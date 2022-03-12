@@ -34,30 +34,32 @@ class ShopItemDetailViewModel : ViewModel() {
     private val addShopItemUseCase = AddShopItemUseCase(repository)
     private val editShopItemUseCase = EditShopItemUseCase(repository)
 
-    private fun getShopItem(shopItemId: Int) {
+    fun getShopItem(shopItemId: Int) {
        val item = getShopItemUseCase.getShopItem(shopItemId)
         _shopItem.value = item
     }
 
-    private fun addShopItem(inputName: String?, inputCount: String?) {
+    fun addShopItem(inputName: String?, inputCount: String?) {
         val name = parseName(inputName)
         val count = parseCount(inputCount)
-        if (fieldValidate(name, count)) {
-            _shopItem.value?.let {
-                val shopItem = it.copy(name = name, count = count)
-                addShopItemUseCase.addShopItem(shopItem)
-                finishWork()
+        if (validateInput(name, count)) {
+            val shopItem = ShopItem(name, count, true)
+            addShopItemUseCase.addShopItem(shopItem)
+            finishWork()
             }
         }
-    }
 
-    private fun editShopItem(inputName: String?, inputCount: String?) {
+
+    fun editShopItem(inputName: String?, inputCount: String?) {
         val name = parseName(inputName)
         val count = parseCount(inputCount)
-        if (fieldValidate(name, count)) {
-            val shopItem = ShopItem(name, count, true)
+        val fieldsValidate = validateInput(name, count)
+        if (fieldsValidate) {
+           _shopItem.value?.let {
+               val shopItem = it.copy(name = name, count = count)
             editShopItemUseCase.editShopItem(shopItem)
             finishWork()
+           }
         }
     }
 
@@ -73,7 +75,7 @@ class ShopItemDetailViewModel : ViewModel() {
         }
     }
 
-    private fun fieldValidate(name: String, count: Int): Boolean {
+    private fun validateInput(name: String, count: Int): Boolean {
         var result = true
         if (name.isBlank()) {
             result = false
