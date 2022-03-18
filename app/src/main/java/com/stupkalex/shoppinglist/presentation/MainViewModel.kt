@@ -1,16 +1,24 @@
 package com.stupkalex.shoppinglist.presentation
 
+import android.app.Application
+import android.widget.Toast
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.stupkalex.shoppinglist.data.ShopListRepositoryImpl
 import com.stupkalex.shoppinglist.domain.DeleteShopItemUseCase
 import com.stupkalex.shoppinglist.domain.EditShopItemUseCase
 import com.stupkalex.shoppinglist.domain.GetShopListUseCase
 import com.stupkalex.shoppinglist.domain.ShopItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    val repository = ShopListRepositoryImpl
+    val repository = ShopListRepositoryImpl(application)
 
     val deleteShopItemUseCase = DeleteShopItemUseCase(repository)
     val editShopItemUseCase = EditShopItemUseCase(repository)
@@ -19,14 +27,15 @@ class MainViewModel : ViewModel() {
     val shopList = getShopListUseCase.getShopList()
 
     fun deleteShopItem(shopItem: ShopItem) {
-        deleteShopItemUseCase.deleteShopItem(shopItem)
+        viewModelScope.launch {
+            deleteShopItemUseCase.deleteShopItem(shopItem)
+        }
     }
 
     fun changeEnabledState(shopItem: ShopItem) {
-        val newShopItem = shopItem.copy(enabled = !shopItem.enabled)
-        editShopItemUseCase.editShopItem(newShopItem)
+        viewModelScope.launch {
+            val newShopItem = shopItem.copy(enabled = !shopItem.enabled)
+            editShopItemUseCase.editShopItem(newShopItem)
+        }
     }
-
-
-
 }

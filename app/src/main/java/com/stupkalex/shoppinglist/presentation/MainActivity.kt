@@ -1,35 +1,55 @@
 package com.stupkalex.shoppinglist.presentation
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.stupkalex.shoppinglist.R
 
-private lateinit var viewModel: MainViewModel
-private lateinit var shopListAdapter: ShopListAdapter
+class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
 
-class MainActivity : AppCompatActivity() {
+    private lateinit var viewModel: MainViewModel
+    private lateinit var shopListAdapter: ShopListAdapter
+    private var shopItemContainer : FragmentContainerView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        shopItemContainer = findViewById(R.id.shop_item_container)
         setupRecyclerView()
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.shopList.observe(this) {
             shopListAdapter.submitList(it)
         }
 
         val buttonAddShopItem = findViewById<FloatingActionButton>(R.id.button_add_shop_item)
         buttonAddShopItem.setOnClickListener {
-            val intent = ShopItemDetailActivity.newIntentAddItem(this)
-            startActivity(intent)
+            if(isOnePadMode()) {
+                val intent = ShopItemDetailActivity.newIntentAddItem(this)
+                startActivity(intent)
+            } else {
+                launchFragment(ShopItemFragment.newInstanceAddItem())
+            }
         }
     }
 
+
+    private fun launchFragment(fragment: Fragment){
+        supportFragmentManager.popBackStack()
+        supportFragmentManager.beginTransaction()
+            .add(R.id.shop_item_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun isOnePadMode(): Boolean{
+        return shopItemContainer == null
+    }
 
     private fun setupRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.rv_shop_list)
@@ -58,9 +78,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         shopListAdapter.onShopItemClickListener = {
-            Log.i("9778856570", "${it.name} \n${it.count.toString()}")
-            val intent = ShopItemDetailActivity.newIntentEditItem(this, it.id)
-            startActivity(intent)
+            if(isOnePadMode()) {
+                val intent = ShopItemDetailActivity.newIntentEditItem(this, it.id)
+                startActivity(intent)
+            } else {
+                launchFragment(ShopItemFragment.newInstanceEditItem(it.id))
+            }
         }
     }
 
@@ -84,5 +107,10 @@ class MainActivity : AppCompatActivity() {
         }
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
+    }
+
+    override fun onEditingFinish() {
+        Toast.makeText(this@MainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show()
+        supportFragmentManager.popBackStack()
     }
 }

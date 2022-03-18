@@ -6,4 +6,5 @@
     <string name="save_button_text">Save</string>
     <string name="text_error_name">Invalid name</string>
     <string name="text_error_count">Invalid count</string>
+    <string name="done">Done</string>
 </resources>
