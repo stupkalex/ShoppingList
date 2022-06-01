@@ -1,8 +1,13 @@
 package com.stupkalex.shoppinglist.domain
 
-class DeleteShopItemUseCase(private val shopListRepository: ShopListRepository) {
+import javax.inject.Inject
 
-    suspend fun deleteShopItem(shopItem: ShopItem){
+class DeleteShopItemUseCase @Inject constructor(
+    val shopListRepository: ShopListRepository
+    ) {
+
+    suspend fun deleteShopItem(shopItem: ShopItem) {
         shopListRepository.deleteShopItem(shopItem)
     }
+
 }

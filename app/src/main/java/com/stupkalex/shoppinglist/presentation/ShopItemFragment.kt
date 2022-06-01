@@ -14,7 +14,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.stupkalex.shoppinglist.R
+import com.stupkalex.shoppinglist.app.ShoppingListApp
 import com.stupkalex.shoppinglist.domain.ShopItem
+import javax.inject.Inject
 
 class ShopItemFragment : Fragment() {
 
@@ -29,6 +31,14 @@ class ShopItemFragment : Fragment() {
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    val component by lazy {
+        (requireActivity().application as ShoppingListApp).component
+    }
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,6 +48,7 @@ class ShopItemFragment : Fragment() {
     }
 
     override fun onAttach(context: Context) {
+        component.inject(this)
         super.onAttach(context)
         if(context is OnEditingFinishedListener){
             onEditingFinishedListener = context
@@ -53,7 +64,7 @@ class ShopItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[ShopItemDetailViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[ShopItemDetailViewModel::class.java]
         initViews(view)
         setupEditTextChangedListener()
         changeModeActivity()

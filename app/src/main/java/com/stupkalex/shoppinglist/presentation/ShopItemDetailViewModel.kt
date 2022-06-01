@@ -1,23 +1,24 @@
 package com.stupkalex.shoppinglist.presentation
 
-import android.app.Application
-import androidx.lifecycle.*
-import com.stupkalex.shoppinglist.data.ShopListRepositoryImpl
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.stupkalex.shoppinglist.domain.AddShopItemUseCase
 import com.stupkalex.shoppinglist.domain.EditShopItemUseCase
 import com.stupkalex.shoppinglist.domain.GetShopItemUseCase
 import com.stupkalex.shoppinglist.domain.ShopItem
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.lang.Exception
+import javax.inject.Inject
 
-class ShopItemDetailViewModel(application: Application) : AndroidViewModel(application) {
+class ShopItemDetailViewModel @Inject constructor(
+    val getShopItemUseCase: GetShopItemUseCase,
+    val addShopItemUseCase: AddShopItemUseCase,
+    val editShopItemUseCase: EditShopItemUseCase
+) : ViewModel() {
 
-    val repository = ShopListRepositoryImpl(application)
 
-       private val _errorInputName = MutableLiveData<Boolean>()
+    private val _errorInputName = MutableLiveData<Boolean>()
     val errorInputName: LiveData<Boolean>
         get() = _errorInputName
 
@@ -33,9 +34,6 @@ class ShopItemDetailViewModel(application: Application) : AndroidViewModel(appli
     val shopItem: LiveData<ShopItem>
         get() = _shopItem
 
-    private val getShopItemUseCase = GetShopItemUseCase(repository)
-    private val addShopItemUseCase = AddShopItemUseCase(repository)
-    private val editShopItemUseCase = EditShopItemUseCase(repository)
 
     fun getShopItem(shopItemId: Int) {
         viewModelScope.launch {

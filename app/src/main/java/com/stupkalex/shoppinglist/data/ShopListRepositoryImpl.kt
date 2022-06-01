@@ -1,18 +1,15 @@
 package com.stupkalex.shoppinglist.data
 
-import android.app.Application
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.stupkalex.shoppinglist.domain.ShopItem
 import com.stupkalex.shoppinglist.domain.ShopListRepository
-import java.lang.RuntimeException
-import kotlin.random.Random
+import javax.inject.Inject
 
-class ShopListRepositoryImpl(application: Application) : ShopListRepository {
-
-    val shopListDao = AppDatabase.getInstance(application).shopListDao()
-    val mapper = ShopListMapper()
+class ShopListRepositoryImpl @Inject constructor(
+    val shopListDao : ShopListDao,
+    val mapper : ShopListMapper
+) : ShopListRepository {
 
     override fun getShopList(): LiveData<List<ShopItem>> = Transformations.map(
         shopListDao.getShopList()
